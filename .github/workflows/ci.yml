@@ -20,22 +20,16 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          # Get latest stable release (excluding pre-releases)
           LATEST=$(gh api repos/MorpheApp/morphe-patches/releases --jq '[.[] | select(.prerelease == false)] | sort_by(.created_at) | reverse | .[0].tag_name')
           echo "Latest stable patches: $LATEST"
-          
-          # Get last built version
           LAST=""
           if git checkout origin/update build.md 2>/dev/null; then
-            # Extract from "Patches: MorpheApp/patches-1.3.2-dev.1.mpp"
             LAST=$(grep -oP 'Patches: MorpheApp/patches-\K.*?(?=\.mpp)' build.md | head -1)
             if [ -n "$LAST" ]; then
               [[ $LAST != v* ]] && LAST="v$LAST"
               echo "Last built: $LAST"
             fi
           fi
-          
-          # Compare
           if [ -z "$LAST" ] || [ "$LATEST" != "$LAST" ]; then
             echo "SHOULD_BUILD=1" >> $GITHUB_OUTPUT
           else
@@ -68,6 +62,30 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           gh run list -L400 --json databaseId -q '.[].databaseId' | tail -n+10 | xargs -IID gh api "repos/$GITHUB_REPOSITORY/actions/runs/ID" -X DELETE || :
+
+      - name: Notify Telegram on CI Failure
+        if: failure()
+        env:
+          TG_TOKEN: ${{ secrets.TG_TOKEN }}
+          TG_CHAT_ID: ${{ secrets.TG_CHAT_ID }}
+        run: |
+          WORKFLOW_URL="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
+
+          MSG="❌ *Morphe CI Check Failed!*
+
+          *Repo:* \`$GITHUB_REPOSITORY\`
+          *Triggered by:* \`$GITHUB_ACTOR\`
+
+          [View Failed Run](${WORKFLOW_URL})"
+
+          curl -s -X POST "https://api.telegram.org/bot${TG_TOKEN}/sendMessage" \
+            -H "Content-Type: application/json" \
+            -d "{
+              \"chat_id\": \"$TG_CHAT_ID\",
+              \"text\": \"$MSG\",
+              \"parse_mode\": \"Markdown\",
+              \"disable_web_page_preview\": true
+            }"
 
     outputs:
       SHOULD_BUILD: ${{ steps.should_build.outputs.SHOULD_BUILD }}
