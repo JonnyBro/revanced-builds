@@ -1,0 +1,12 @@
+# APKs
+*.apk
+*.apkm
+
+# Keystores
+*.keystore
+
+# Main executable
+*.jar
+
+# Patches
+*.mpp
