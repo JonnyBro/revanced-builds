@@ -1,12 +1,15 @@
-# APKs
-*.apk
-*.apkm
+original/*
+patched/*
 
 # Keystores
 *.keystore
 
-# Main executable
+# JARs
 *.jar
 
 # Patches
 *.mpp
+
+# Temp files
+*temporary*
+tmp*
