@@ -1,3 +1,5 @@
+Music (arm64-v8a): 9.15.51  
+Music (arm-v7a): 9.15.51  
 YouTube: 21.04.223  
 
 Install [MicroG-RE](https://github.com/MorpheApp/MicroG-RE/releases/latest) for non-root YouTube and YT Music APKs  
