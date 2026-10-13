@@ -274,7 +274,7 @@ semver_validate() {
 	local a="${1%-*}"
 	local a="${a#v}"
 	local ac="${a//[.0-9]/}"
-	[ ${#ac} = 0 ]
+	[ -n "$a" ] && [ ${#ac} = 0 ]
 }
 get_patch_last_supported_ver() {
 	local list_patches=$1 pkg_name=$2 inc_sel=$3 is_experimental=$4
